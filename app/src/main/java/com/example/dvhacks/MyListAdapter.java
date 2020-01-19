@@ -24,7 +24,7 @@ public class MyListAdapter extends ArrayAdapter<String>{
     private final ArrayList<String> moodScore;
 
 
-    public MyListAdapter(Activity context, ArrayList<String> date,ArrayList<String> title, ArrayList<String> moodScore) {
+    public MyListAdapter(Activity context, ArrayList<String> date, ArrayList<String> title, ArrayList<String> moodScore) {
         super(context, R.layout.row, title);
         // TODO Auto-generated constructor stub
 

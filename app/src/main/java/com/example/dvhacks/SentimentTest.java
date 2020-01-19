@@ -1,5 +1,8 @@
 package com.example.dvhacks;
 
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -9,30 +12,24 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-/*
-import opennlp.tools.postag.POSModel;
-import opennlp.tools.postag.POSSample;
-import opennlp.tools.postag.POSTaggerME;
-import opennlp.tools.tokenize.WhitespaceTokenizer;
-*/
-import androidx.appcompat.app.AppCompatActivity;
 public class SentimentTest extends AppCompatActivity {
 
     TextView textView;
@@ -83,43 +80,32 @@ public class SentimentTest extends AppCompatActivity {
     public void run() {
         // Get the nouns from the flask server
         JSONObject nounParams = new JSONObject();
-        Log.d("WATSON", text);
-        /*try {
-            //nounParams.put("text", text);
-            nounParams.put("text", "");
+        try {
+            nounParams.put("text", text);
+
             Log.d("WATSON", "nounParams: " + nounParams.toString());
         } catch (JSONException e) {
             e.printStackTrace();
             Log.d("WATSON", "JSONerror");
-        }*/
-
-        /*try {
-            InputStream input = new FileInputStream("en-token.bin");
-            TokenizerModel model = new TokenizerModel(input);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }*/
-
+        }
 
         JsonObjectRequest req = new JsonObjectRequest
-                (Request.Method.GET, "http://9d31d837.ngrok.io/?text="+text, nounParams, new Response.Listener<JSONObject>() {
+                (Request.Method.POST, "http://9d31d837.ngrok.io/?text=name", nounParams, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
-                        //Log.d("WATSON", "RESPONSE");
+
                         Log.d("WATSON", "in on response: " + response.toString());
 
                         try {
                             JSONArray nounsResult = (JSONArray) response.get("output");
                             nouns = new String[nounsResult.length()];
-                            String all = "";
-                            for (int i = 0; i < nouns.length; i++) {
+
+                            for(int i = 0; i < nouns.length; i++){
                                 nouns[i] = (String) nounsResult.get(i);
-                                all += nouns[i] + " ";
                             }
 
-                            textView.setText(all);
-                            //fillScoreMap(text);
+                            fillScoreMap(text);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -130,7 +116,7 @@ public class SentimentTest extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         // TODO: Handle error
                         System.out.println(error);
-                        Log.d("WATSON", "The error " + error.toString());
+                        Log.d("WATSON", error.toString());
                         textView.setText(error.toString());
                     }
         }) {
@@ -141,7 +127,6 @@ public class SentimentTest extends AppCompatActivity {
                 return headers;
             }
         };
-
             /*Log.d("WATSON", "" + req.getTimeoutMs());
 
             req.setRetryPolicy(new DefaultRetryPolicy(
@@ -183,7 +168,7 @@ public class SentimentTest extends AppCompatActivity {
         Log.d("WATSON", json.toString());
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, url, json, new Response.Listener<JSONObject>() {
+                (Request.Method.POST, url, json, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
@@ -201,7 +186,6 @@ public class SentimentTest extends AppCompatActivity {
                         } catch (JSONException e) {
                             textView.setText(e.toString());
                         }
-                        //Log.d("WATSON", "Response");
                         //textView.setText(scoreMap.toString());
                     }
                 }, new Response.ErrorListener() {
@@ -221,7 +205,6 @@ public class SentimentTest extends AppCompatActivity {
                 String auth = "Basic " + Base64.encodeToString(credentials.getBytes(), Base64.NO_WRAP);
                 headers.put("Content-Type", "application/json");
                 headers.put("Authorization", auth);
-                headers.put("Content-Type", "application/json");
                 return headers;
             }
         };
