@@ -37,4 +37,15 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.808" />
 
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/dylan_xbold"
+        android:text="TODAY'S DATE"
+        android:textColor="#F02125"
+        android:textSize="18dp"
+        tools:layout_editor_absoluteX="48dp"
+        tools:layout_editor_absoluteY="86dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
