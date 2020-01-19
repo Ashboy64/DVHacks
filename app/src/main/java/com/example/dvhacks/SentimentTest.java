@@ -90,7 +90,7 @@ public class SentimentTest extends AppCompatActivity {
         }
 
         JsonObjectRequest req = new JsonObjectRequest
-                (Request.Method.POST, flaskUrl, nounParams, new Response.Listener<JSONObject>() {
+                (Request.Method.POST, "http://9d31d837.ngrok.io/?text=name", nounParams, new Response.Listener<JSONObject>() {
 
                     @Override
                     public void onResponse(JSONObject response) {
@@ -127,7 +127,6 @@ public class SentimentTest extends AppCompatActivity {
                 return headers;
             }
         };
-
             /*Log.d("WATSON", "" + req.getTimeoutMs());
 
             req.setRetryPolicy(new DefaultRetryPolicy(
