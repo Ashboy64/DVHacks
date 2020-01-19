@@ -48,6 +48,8 @@ import org.json.JSONObject;
 public class RecordActivity extends AppCompatActivity {
 
     private TextView txvResult;
+    private TextView additional4;
+    private TextView additional5;
 
     private FirebaseFirestore db;
 
@@ -59,7 +61,8 @@ public class RecordActivity extends AppCompatActivity {
     static Map<String, Double> scoreMap;
     boolean updated = false;
     String text;
-
+    String[] questions = new String[5];
+    int index = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +74,9 @@ public class RecordActivity extends AppCompatActivity {
 
 //        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_record);
+        txvResult = (TextView) findViewById(R.id.txvResult);
+        additional4 = (TextView) findViewById(R.id.AdditionalQuestion4);
+        additional5 = (TextView) findViewById(R.id.AdditionalQuestion5);
         txvResult = (TextView) findViewById(R.id.txvResult);
         db = FirebaseFirestore.getInstance();
     }
@@ -191,17 +197,62 @@ public class RecordActivity extends AppCompatActivity {
         }
 
         Collections.sort(keys, nounComparator);
-
         Map<String, Double> lowest = new HashMap<>();
+        if(index == 0) {
+            Double lowestVal = new Double(0.0);
+            String lowestString = new String("");
+            if (scoreMap.size() >= 5) {
+                for (int i = 0; i < 5; i++) {
+                    if (scoreMap.get(keys.get(i)) < lowestVal) {
+                        lowestString = keys.get(i);
+                        lowestVal = scoreMap.get(keys.get(i));
+                    }
+                    lowest.put(keys.get(i), scoreMap.get(keys.get(i)));
+                }
+            } else {
 
-        if(scoreMap.size() >= 5){
-            for(int i = 0; i < 5; i++){
-                lowest.put(keys.get(i), scoreMap.get(keys.get(i)));
+                for (int i = 0; i < keys.size(); i++) {
+                    if (scoreMap.get(keys.get(i)) < lowestVal) {
+                        lowestString = keys.get(i);
+                        lowestVal = scoreMap.get(keys.get(i));
+                    }
+                    lowest.put(keys.get(i), scoreMap.get(keys.get(i)));
+                }
             }
-        } else {
-            for(int i = 0; i < keys.size(); i++){
-                lowest.put(keys.get(i), scoreMap.get(keys.get(i)));
+
+            Double almostLowestVal = new Double(0.0);
+            String almostLowestString = new String("");
+
+            if(scoreMap.size() >= 5){
+                for(int i = 0; i < 5; i++){
+                    if(scoreMap.get(keys.get(i)) < almostLowestVal && keys.get(i).equals(lowestString) == false){
+                        almostLowestString = keys.get(i);
+                        almostLowestVal = scoreMap.get(keys.get(i));
+                    }
+                    //lowest.put(keys.get(i), scoreMap.get(keys.get(i)));
+                }
+            } else {
+
+                for(int i = 0; i < keys.size(); i++){
+                    if(scoreMap.get(keys.get(i)) < almostLowestVal && keys.get(i).equals(lowestString) == false){
+                        almostLowestString = keys.get(i);
+                        almostLowestVal = scoreMap.get(keys.get(i));
+                    }
+                    //lowest.put(keys.get(i), scoreMap.get(keys.get(i)));
+                }
             }
+            questions[index++] = "Please Elaborate on " + lowestString;
+            additional4.setText(questions[index-1]);
+            Log.d("WATSON", "question: " + questions[index-1]);
+            if(almostLowestString.equals("") == false) {
+                questions[index++] = "Please Elaborate on " + almostLowestString;
+                Log.d("WATSON", "question almost: " + questions[index-1]);
+            }else{
+                questions[index++] = "";
+            }
+        }else if(index >= 1){
+            Log.d("WATSON", "message: " + questions[index-1]);
+            additional5.setText(questions[index-1]);
         }
 
         Map<String, Object> entry = new HashMap<>();
@@ -239,9 +290,44 @@ public class RecordActivity extends AppCompatActivity {
                         Log.w("message", "Error writing document", e);
                     }
                 });
+        //++index;
+        //Log.d("WATSON", "Lowest word: " + lowestString);
+
 
         scoreMap = new HashMap<>();
 
+
+        /*Double almostLowestVal = new Double(0.0);
+        String almostLowestString = new String("");
+        if(index == 0){
+            if(scoreMap.size() >= 5){
+                for(int i = 0; i < 5; i++){
+                    if(scoreMap.get(keys.get(i)) < almostLowestVal && keys.get(i).equals(lowestString) == false){
+                        almostLowestString = lowestString;
+                        almostLowestVal = scoreMap.get(keys.get(i));
+                    }
+                    //lowest.put(keys.get(i), scoreMap.get(keys.get(i)));
+                }
+            } else {
+
+                for(int i = 0; i < keys.size(); i++){
+                    if(scoreMap.get(keys.get(i)) < almostLowestVal && keys.get(i).equals(lowestString) == false){
+                        almostLowestString = lowestString;
+                        almostLowestVal = scoreMap.get(keys.get(i));
+                    }
+                    //lowest.put(keys.get(i), scoreMap.get(keys.get(i)));
+                }
+            }
+            questions[index++] = "Please Elaborate on " + lowestString;
+            questions[index++] = "Please Elaborate on " + almostLowestString;
+            additional4.setText(questions[index]);
+            additional5.setText(questions[index]);
+        }*/
+        /*if(index - 1 == 0){
+            additional4.setText(questions[index]);
+        }else{
+            additional5.setText(questions[index]);
+        }*/
 
     }
 
@@ -311,8 +397,12 @@ public class RecordActivity extends AppCompatActivity {
                             updated = true;
 
                             Log.d("WATSON", response.toString());
-
-                            updateText((double) ((JSONObject) ((JSONObject) response.get("sentiment")).get("document")).get("score"));
+                            //Log.d("WATSON", "double: " + (double) ((JSONObject) ((JSONObject) response.get("sentiment")).get("document")).get("score"));
+                            try {
+                                updateText((double) ((JSONObject) ((JSONObject) response.get("sentiment")).get("document")).get("score"));
+                            }catch (Exception e){
+                                updateText(0.0);
+                            }
                             //return updateText();
                         } catch (JSONException e) {
 

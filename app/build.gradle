@@ -36,4 +36,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
     implementation 'com.google.firebase:firebase-firestore:21.3.1'
     implementation 'com.google.android.material:material:1.0.0'
+    implementation 'org.apache.opennlp:opennlp:1.9.2'
 }
