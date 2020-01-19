@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -37,9 +38,12 @@ public class SentimentTest extends AppCompatActivity {
     String sentiment;
     RequestQueue queue;
     String url = "https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/11054001-9e5a-43d7-96eb-520a992ee4b6/v1/analyze?version=2019-07-12";
+    String flaskUrl = "http://fc100f80.ngrok.io/";
     double[] scores;
     String[] nouns;
     Map<String, Double> scoreMap;
+    boolean updated = false;
+    String text;
 
 
     @Override
@@ -59,11 +63,79 @@ public class SentimentTest extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 textView.setText("Checking sentiment of: " + editText.getText());
-                nouns = new String[]{"apples", "math test"};
-                fillScoreMap("I love apples! I hate math test.");
-                textView.setText(scoreMap.toString());
+                text = editText.getText().toString();
+//                nouns = new String[]{"apples", "math test"};
+                run();
+//                fillScoreMap("I love apples! I hate math test.");
+//                textView.setText(scoreMap.toString());
             }
         });
+    }
+
+    public void updateText(){
+        textView.setText(scoreMap.toString());
+//        return scoreMap.toString();
+    }
+
+    public void run() {
+        // Get the nouns from the flask server
+        JSONObject nounParams = new JSONObject();
+        try {
+            nounParams.put("text", text);
+
+            Log.d("WATSON", "nounParams: " + nounParams.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.d("WATSON", "JSONerror");
+        }
+
+        JsonObjectRequest req = new JsonObjectRequest
+                (Request.Method.POST, flaskUrl, nounParams, new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+
+                        Log.d("WATSON", "in on response: " + response.toString());
+
+                        try {
+                            JSONArray nounsResult = (JSONArray) response.get("output");
+                            nouns = new String[nounsResult.length()];
+
+                            for(int i = 0; i < nouns.length; i++){
+                                nouns[i] = (String) nounsResult.get(i);
+                            }
+
+                            fillScoreMap(text);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // TODO: Handle error
+                        System.out.println(error);
+                        Log.d("WATSON", error.toString());
+                        textView.setText(error.toString());
+                    }
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json");
+                return headers;
+            }
+        };
+
+            /*Log.d("WATSON", "" + req.getTimeoutMs());
+
+            req.setRetryPolicy(new DefaultRetryPolicy(
+                    2500,
+                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));*/
+
+        queue.add(req);
     }
 
     public void fillScoreMap(String text) {
@@ -94,6 +166,8 @@ public class SentimentTest extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        Log.d("WATSON", json.toString());
+
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                 (Request.Method.POST, url, json, new Response.Listener<JSONObject>() {
 
@@ -104,11 +178,16 @@ public class SentimentTest extends AppCompatActivity {
                             for(int i = 0; i < targetsArray.length(); i++){
                                 JSONObject target = (JSONObject) targetsArray.get(i);
                                 scoreMap.put(target.get("text").toString(), (Double) target.get("score"));
+                                textView.setText(""+i);
                             }
+                            updated = true;
+                            textView.setText("updated");
+                            updateText();
+                            //return updateText();
                         } catch (JSONException e) {
                             textView.setText(e.toString());
                         }
-//                        textView.setText(scoreMap.toString());
+                        //textView.setText(scoreMap.toString());
                     }
                 }, new Response.ErrorListener() {
 
@@ -132,13 +211,5 @@ public class SentimentTest extends AppCompatActivity {
         };
 
         queue.add(jsonObjectRequest);
-
-//        while(scoreMap.keySet().size() == 0){
-//            try {
-//                Thread.sleep(1000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-//        }
     }
 }
