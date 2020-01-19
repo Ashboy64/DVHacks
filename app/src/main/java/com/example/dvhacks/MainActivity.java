@@ -10,11 +10,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -31,6 +33,9 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity {
 
     ListView list;
+
+    ImageView profile;
+    FloatingActionButton create;
 
     private FirebaseFirestore db;
 
@@ -49,42 +54,32 @@ public class MainActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         buildArrays();
+        profile = (ImageView) findViewById(R.id.imageView);
 
-//        date.add("TUESDAY, JAN 12");
-//        date.add("WEDNESDAY, JAN 13");
-//        date.add("THURSDAY, JAN 14");
-//        date.add("TUESDAY, JAN 12");
-//        date.add("WEDNESDAY, JAN 13");
-//        date.add("THURSDAY, JAN 14");
-//
-//
-//        title.add("The president declared a state of national emergency.");
-//        title.add("Half the class died this morning from the smell.");
-//        title.add("The fart stayed in the air till today.");
-//        title.add("The president declared a state of national emergency.");
-//        title.add("Half the class died this morning from the smell.");
-//        title.add("The fart stayed in the air till today.");
-//
-//        mood.add("MOOD DETECTED: HAPPY");
-//        mood.add("MOOD DETECTED: SAD");
-//        mood.add("MOOD DETECTED: HAPPY");
-//        mood.add("MOOD DETECTED: HAPPY");
-//        mood.add("MOOD DETECTED: SAD");
-//        mood.add("MOOD DETECTED: HAPPY");
-
-//        Log.d("YOOOOI", date.toString());
-
-
+        profile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), AnalyticsActivity.class);
+                startActivity(intent);
+            }
+        });
+        create = (FloatingActionButton) findViewById(R.id.floatingActionButton);
+        create.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), RecordActivity.class);
+                startActivity(intent);
+            }
+        });
 
     }
+
 
     public void buildView() {
         MyListAdapter listAdapter = new MyListAdapter(this, date, title, mood);
         list=(ListView)findViewById(R.id.list);
         list.setAdapter(listAdapter);
         Toast.makeText(getApplicationContext(),listAdapter.getCount() + "",Toast.LENGTH_SHORT).show();
-
-
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -148,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
                                             date.add("Saturday");
                                             break;
                                     }
-                                    
+
                                     date2 = format2.format(dateObj);
                                 } catch (ParseException e) {
                                     e.printStackTrace();

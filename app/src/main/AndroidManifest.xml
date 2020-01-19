@@ -13,22 +13,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ViewEntry">
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-        </activity>
         <activity android:name=".AnalyticsActivity">
 
         </activity>
-        <activity android:name=".RecordActivity" />
-        <activity android:name=".SentimentTest" />
+        <activity android:name=".RecordActivity"></activity>
+        <activity android:name=".SentimentTest"></activity>
+        <activity android:name=".ViewEntry"></activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

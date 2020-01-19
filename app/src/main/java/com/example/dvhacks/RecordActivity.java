@@ -10,10 +10,8 @@ import android.os.Bundle;
 
 import android.util.Base64;
 import android.util.Log;
-import android.view.Window;
 import android.widget.TextView;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -26,11 +24,9 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -48,6 +44,8 @@ import org.json.JSONObject;
 public class RecordActivity extends AppCompatActivity {
 
     private TextView txvResult;
+    private TextView additional4_output;
+    private TextView additional5_output;
     private TextView additional4;
     private TextView additional5;
 
@@ -62,8 +60,8 @@ public class RecordActivity extends AppCompatActivity {
     boolean updated = false;
     String text;
     String[] questions = new String[5];
+    int question_index = 0;
     int index = 0;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -74,10 +72,12 @@ public class RecordActivity extends AppCompatActivity {
 
 //        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_record);
-        txvResult = (TextView) findViewById(R.id.txvResult);
-        additional4 = (TextView) findViewById(R.id.AdditionalQuestion4);
-        additional5 = (TextView) findViewById(R.id.AdditionalQuestion5);
-        txvResult = (TextView) findViewById(R.id.txvResult);
+        txvResult = (TextView) findViewById(R.id.answer1);
+        additional4_output = (TextView) findViewById(R.id.answer2);
+        additional5_output = (TextView) findViewById(R.id.answer3);
+        additional4 = (TextView) findViewById(R.id.question2);
+        additional5 = (TextView) findViewById(R.id.question3);
+        //txvResult = (TextView) findViewById(R.id.answer1);
         db = FirebaseFirestore.getInstance();
     }
 
@@ -189,8 +189,13 @@ public class RecordActivity extends AppCompatActivity {
 
 
     public void updateText(double documentScore){
-        txvResult.setText(text);
-
+        if(index == 0) {
+            txvResult.setText(text);
+        }else if(index == 1){
+            additional4_output.setText(text);
+        }else{
+            additional5_output.setText(text);
+        }
         ArrayList<String> keys = new ArrayList<>();
         for(String str: scoreMap.keySet()){
             keys.add(str);
@@ -198,7 +203,7 @@ public class RecordActivity extends AppCompatActivity {
 
         Collections.sort(keys, nounComparator);
         Map<String, Double> lowest = new HashMap<>();
-        if(index == 0) {
+        if(question_index == 0) {
             Double lowestVal = new Double(0.0);
             String lowestString = new String("");
             if (scoreMap.size() >= 5) {
@@ -241,20 +246,21 @@ public class RecordActivity extends AppCompatActivity {
                     //lowest.put(keys.get(i), scoreMap.get(keys.get(i)));
                 }
             }
-            questions[index++] = "Please Elaborate on " + lowestString;
-            additional4.setText(questions[index-1]);
-            Log.d("WATSON", "question: " + questions[index-1]);
+            questions[question_index++] = "Please Elaborate on " + lowestString;
+            additional4.setText(questions[question_index-1]);
+            Log.d("WATSON", "question: " + questions[question_index-1]);
             if(almostLowestString.equals("") == false) {
-                questions[index++] = "Please Elaborate on " + almostLowestString;
-                Log.d("WATSON", "question almost: " + questions[index-1]);
+                questions[question_index++] = "Please Elaborate on " + almostLowestString;
+                Log.d("WATSON", "question almost: " + questions[question_index-1]);
             }else{
-                questions[index++] = "";
+                questions[question_index++] = "";
             }
-        }else if(index >= 1){
-            Log.d("WATSON", "message: " + questions[index-1]);
-            additional5.setText(questions[index-1]);
-        }
 
+        }else if(question_index >= 1){
+            Log.d("WATSON", "message: " + questions[question_index-1]);
+            additional5.setText(questions[question_index-1]);
+        }
+        index+=1;
         Map<String, Object> entry = new HashMap<>();
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");

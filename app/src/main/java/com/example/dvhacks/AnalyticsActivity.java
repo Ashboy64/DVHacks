@@ -34,6 +34,8 @@ public class AnalyticsActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     GraphView graph;
     static Map<String, Integer> nounMap;
+    double totalScore;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +44,7 @@ public class AnalyticsActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         nounMap = new HashMap<>();
+        totalScore = 0.0;
         buildGraph();
         buildMap();
     }
@@ -65,7 +68,6 @@ public class AnalyticsActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Map<String, Double> map = (Map<String, Double>) document.get("lowest");
                                 for(String key : map.keySet()){
@@ -128,7 +130,10 @@ public class AnalyticsActivity extends AppCompatActivity {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 arrList.add(new DataPoint(currIndex, Double.parseDouble(document.get("entry_score").toString())));
                                 currIndex++;
+
+                                totalScore+=Double.parseDouble(document.get("entry_score").toString());
                             }
+                            totalScore /= task.getResult().size();
 
                             DataPoint[] dataPoints = new DataPoint[arrList.size()];
 
@@ -142,6 +147,22 @@ public class AnalyticsActivity extends AppCompatActivity {
 
                             LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(dataPoints);
                             graph.addSeries(series);
+
+                            ((TextView) findViewById(R.id.textView23)).setText(totalScore + "");
+
+                            if(totalScore > 0.7){
+                                ((TextView) findViewById(R.id.textView23)).setText("Great");
+                            } else if (totalScore > 0.2){
+                                ((TextView) findViewById(R.id.textView23)).setText("Good");
+                            } else if (totalScore > 0){
+                                ((TextView) findViewById(R.id.textView23)).setText("Decent");
+                            } else if (totalScore > -0.2){
+                                ((TextView) findViewById(R.id.textView23)).setText("Meh");
+                            } else if (totalScore > -0.7){
+                                ((TextView) findViewById(R.id.textView23)).setText("Not Great");
+                            } else if (totalScore > -1){
+                                ((TextView) findViewById(R.id.textView23)).setText("Bad");
+                            }
 
                         } else {
                             Log.d("YOOOI", "Error getting documents: ", task.getException());
