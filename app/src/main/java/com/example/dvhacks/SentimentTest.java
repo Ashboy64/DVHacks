@@ -38,7 +38,7 @@ public class SentimentTest extends AppCompatActivity {
     String sentiment;
     RequestQueue queue;
     String url = "https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/11054001-9e5a-43d7-96eb-520a992ee4b6/v1/analyze?version=2019-07-12";
-    String flaskUrl = "http://fc100f80.ngrok.io/";
+    String flaskUrl = "http://9d31d837.ngrok.io/";
     double[] scores;
     String[] nouns;
     Map<String, Double> scoreMap;
