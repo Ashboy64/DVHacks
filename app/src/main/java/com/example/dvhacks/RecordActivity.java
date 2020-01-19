@@ -250,7 +250,20 @@ public class RecordActivity extends AppCompatActivity {
         scores = new double[nouns.length];
 
         try {
-            json.put("text", text);
+            String tempText = "";
+
+            String[] arrOfStr = text.split(" ");
+            for(int i = 0; i < arrOfStr.length; i++){
+                if(i%7 == 0 && i != 0){
+                    tempText = tempText + ".";
+                }
+
+                tempText += " " + arrOfStr[i];
+            }
+
+
+
+            json.put("text", tempText);
 
             JSONObject json2 = new JSONObject();
             JSONObject json3 = new JSONObject();
@@ -285,7 +298,15 @@ public class RecordActivity extends AppCompatActivity {
                             for(int i = 0; i < targetsArray.length(); i++){
                                 JSONObject target = (JSONObject) targetsArray.get(i);
                                 Log.d("target", "target: " + target.toString());
-                                scoreMap.put(target.get("text").toString(), (Double) ((double) target.get("score")));
+                                double score;
+
+                                try {
+                                    score = (double) target.get("score");
+                                } catch (ClassCastException e){
+                                    score = 0.0;
+                                }
+
+                                scoreMap.put(target.get("text").toString(), score);
                             }
                             updated = true;
 
