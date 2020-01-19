@@ -64,9 +64,9 @@ public class SentimentTest extends AppCompatActivity {
             public void onClick(View v) {
                 textView.setText("Checking sentiment of: " + editText.getText());
                 text = editText.getText().toString();
-//                nouns = new String[]{"apples", "math test"};
-                run();
-//                fillScoreMap("I love apples! I hate math test.");
+                nouns = new String[]{"bees"};
+//                run();
+                fillScoreMap("bees are very good for society I like bees but I hate bees because bees are bad");
 //                textView.setText(scoreMap.toString());
             }
         });
