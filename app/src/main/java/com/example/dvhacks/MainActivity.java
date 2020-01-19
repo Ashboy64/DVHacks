@@ -5,6 +5,7 @@ package com.example.dvhacks;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> date = new ArrayList<>();
     ArrayList<String> title = new ArrayList<>();
     ArrayList<String> mood = new ArrayList<>();
+    ArrayList<String> conversations = new ArrayList<>();
 
     boolean done = false;
 
@@ -89,28 +91,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
                 // TODO Auto-generated method stub
-                if(position == 0) {
-                    //code specific to first list item
-                    Toast.makeText(getApplicationContext(),"Place Your First Option Code",Toast.LENGTH_SHORT).show();
-                }
+                Intent intent = new Intent(getBaseContext(), ViewEntry.class);
+                intent.putExtra("DATE", date.get(position));
+                intent.putExtra("TITLE", title.get(position));
+                intent.putExtra("MOOD", mood.get(position));
+                intent.putExtra("CONVO", conversations.get(position));
+                startActivity(intent);
 
-                else if(position == 1) {
-                    //code specific to 2nd list item
-                    Toast.makeText(getApplicationContext(),"Place Your Second Option Code",Toast.LENGTH_SHORT).show();
-                }
-
-                else if(position == 2) {
-
-                    Toast.makeText(getApplicationContext(),"Place Your Third Option Code",Toast.LENGTH_SHORT).show();
-                }
-                else if(position == 3) {
-
-                    Toast.makeText(getApplicationContext(),"Place Your Forth Option Code",Toast.LENGTH_SHORT).show();
-                }
-                else if(position == 4) {
-
-                    Toast.makeText(getApplicationContext(),"Place Your Fifth Option Code",Toast.LENGTH_SHORT).show();
-                }
 
             }
         });
@@ -170,10 +157,27 @@ public class MainActivity extends AppCompatActivity {
                                 title.add(date2);
                                 mood.add(document.get("entry_score").toString());
 
+                                // Add conversations into conversations
+                                DocumentReference docRef = db.collection("entries").document(document.getId()).collection("conversation").document("discussion");
+                                docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            DocumentSnapshot document = task.getResult();
+                                            if (document.exists()) {
+                                                conversations.add(document.get("answer").toString());
+                                                buildView();
+                                            } else {
+                                                Log.d("OH NO", "No such document");
+                                            }
+                                        } else {
+                                            Log.d("OH NO", "get failed with ", task.getException());
+                                        }
+                                    }
+                                });
+
                                 Log.d("YOOI", document.getData().toString());
                             }
-
-                            buildView();
                         } else {
                             Log.d("YOOOI", "Error getting documents: ", task.getException());
                         }
